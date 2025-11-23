@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ModInfo>
-	<Name value="BotCommandMod"/>
-	<DisplayName value="BotCommandMod"/>
-	<Description value="Intercepts chat messages starting with /bot and logs them to telnet only"/>
-	<Author value="Claude"/>
-	<Version value="1.0.0"/>
+	<ModInfo>
+		<Name value="BotCommandMod"/>
+		<DisplayName value="BotCommandMod"/>
+		<Version value="1.0.0"/>
+		<Description value="Intercepts chat messages starting with /bot and logs them to telnet only"/>
+		<Author value="Claude"/>
+		<Website value=""/>
+	</ModInfo>
 </ModInfo>
