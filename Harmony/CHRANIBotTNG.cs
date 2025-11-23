@@ -17,7 +17,7 @@ public class CHRANIBotTNG : IModApi
 [HarmonyPatch(typeof(GameManager), "ChatMessageServer")]
 public class ChatMessagePatch
 {
-    static bool Prefix(ClientInfo _cInfo, EChatType _chatType, int _senderEntityId, string _msg, List<int> _recipientEntityIds, EMessageSender _msgSender, BbCodeSupportMode _bbMode)
+    static bool Prefix(ClientInfo _cInfo, string _msg)
     {
         if (_msg != null && _msg.StartsWith("/bot "))
         {
