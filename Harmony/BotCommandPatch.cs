@@ -13,17 +13,18 @@ public class BotCommandMod : IModApi
     }
 }
 
-[HarmonyPatch(typeof(GameManager), "ChatMessage")]
-public class ChatMessagePatch
+[HarmonyPatch(typeof(ChatCommandManager), "ProcessCommand")]
+public class ChatCommandPatch
 {
-    static bool Prefix(ClientInfo _cInfo, EChatType _type, string _msg, string _playerName)
+    static bool Prefix(ChatCommandManager __instance, string _chatText, ClientInfo _cInfo)
     {
-        if (_msg != null && _msg.StartsWith("/bot "))
+        if (_chatText != null && _chatText.StartsWith("/bot "))
         {
             string playerName = _cInfo != null ? _cInfo.playerName : "Server";
-            Console.WriteLine($"[Bot] {playerName}: {_msg}");
+            Console.WriteLine($"[Bot] {playerName}: {_chatText}");
             return false;
         }
         return true;
     }
 }
+
