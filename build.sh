@@ -5,7 +5,7 @@ GAME_DIR="${GAME_DIR:-$HOME/Software/SteamLibrary/steamapps/common/7 Days To Die
 
 # Use csc (Roslyn compiler) instead of mcs
 csc -target:library \
-    -out:CHRANIBotTNG.dll \
+    -out:CHRANIBotTNG/CHRANIBotTNG.dll \
     -nostdlib \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/mscorlib.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/netstandard.dll" \
