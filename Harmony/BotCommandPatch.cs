@@ -1,26 +1,29 @@
 using HarmonyLib;
 using System.Reflection;
+using UnityEngine;
 
 public class BotCommandMod : IModApi
 {
     public void InitMod(Mod _modInstance)
     {
-        Log.Out("[BotCommandMod] Loading");
+        Debug.Log("[BotCommandMod] Loading");
         var harmony = new Harmony("com.botcommand.mod");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
-        Log.Out("[BotCommandMod] Loaded");
+        Debug.Log("[BotCommandMod] Loaded");
     }
 }
 
-[HarmonyPatch(typeof(ChatCommandManager))]
-[HarmonyPatch("ExecuteCommand")]
+[HarmonyPatch(typeof(NetPackageChat))]
+[HarmonyPatch("ProcessPackage")]
 public class ChatCommandPatch
 {
-    static bool Prefix(string _command, ClientInfo _cInfo)
+    static bool Prefix(NetPackageChat __instance, World _world)
     {
-        if (_command != null && _command.StartsWith("/bot "))
+        if (__instance.Message != null && __instance.Message.StartsWith("/bot "))
         {
-            Log.Out($"[Bot] {(_cInfo != null ? _cInfo.playerName : "Server")}: {_command}");
+            ClientInfo cInfo = ConnectionManager.Instance.Clients.ForEntityId(__instance.Sender);
+            string playerName = cInfo != null ? cInfo.playerName : "Unknown";
+            Debug.Log($"[Bot] {playerName}: {__instance.Message}");
             return false;
         }
         return true;
