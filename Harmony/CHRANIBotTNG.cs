@@ -24,7 +24,7 @@ public class ChatMessagePatch
             string playerName = _cInfo != null ? _cInfo.playerName : "Server";
 
             // Write to server log (visible in telnet)
-            Log.Out($"Chat (from '{playerName}', entity id '{(_cInfo != null ? _cInfo.entityId.ToString() : "-1")}', to '{(_recipientEntityIds != null && _recipientEntityIds.Count > 0 ? "players" : "all")}'): '{_msg}'");
+            Console.WriteLine($"Chat (from '{playerName}', entity id '{(_cInfo != null ? _cInfo.entityId.ToString() : "-1")}', to '{(_recipientEntityIds != null && _recipientEntityIds.Count > 0 ? "players" : "all")}'): '{_msg}'");
 
             // Block in-game chat display
             return false;
