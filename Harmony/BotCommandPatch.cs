@@ -1,6 +1,5 @@
 using HarmonyLib;
 using System.Reflection;
-using System.Collections.Generic;
 using System;
 
 public class BotCommandMod : IModApi
@@ -14,11 +13,10 @@ public class BotCommandMod : IModApi
     }
 }
 
-[HarmonyPatch(typeof(GameManager))]
-[HarmonyPatch("ChatMessageServer")]
+[HarmonyPatch(typeof(GameManager), "ChatMessage")]
 public class ChatMessagePatch
 {
-    static bool Prefix(ClientInfo _cInfo, EChatType _type, int _senderId, string _msg, string _mainName, bool _localizeMain, List<int> _recipientEntityIds)
+    static bool Prefix(ClientInfo _cInfo, EChatType _type, string _msg, string _playerName)
     {
         if (_msg != null && _msg.StartsWith("/bot "))
         {
