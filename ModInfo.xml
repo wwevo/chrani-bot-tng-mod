@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <xml>
-	<ModInfo>
-		<Name value="BotCommandMod"/>
-		<Description value="Intercepts chat messages starting with /bot and logs them to telnet only"/>
-		<Author value="Claude"/>
-		<Version value="1.0.0"/>
-	</ModInfo>
+<Name value="CHRANIBotTNG" />
+<DisplayName value="CHRANI-Bot-TNG" />
+<Description value="Companion Mod for the CHRANI-Bot-TNG" />
+<Author value="wwevo" />
+<Version value="2.0.0.0" />
+<Website value="https://code.notjustfor.me/wwevo/chrani-bot-tng-mod" />
 </xml>
