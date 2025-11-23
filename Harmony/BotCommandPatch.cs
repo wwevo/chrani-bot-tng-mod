@@ -1,30 +1,27 @@
 using HarmonyLib;
 using System.Reflection;
 using System;
+using System.Linq;
 
 public class BotCommandMod : IModApi
 {
     public void InitMod(Mod _modInstance)
     {
         Console.WriteLine("[BotCommandMod] Loading");
-        var harmony = new Harmony("com.botcommand.mod");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
-        Console.WriteLine("[BotCommandMod] Loaded");
-    }
-}
 
-[HarmonyPatch(typeof(ChatCommandManager), "ProcessCommand")]
-public class ChatCommandPatch
-{
-    static bool Prefix(ChatCommandManager __instance, string _chatText, ClientInfo _cInfo)
-    {
-        if (_chatText != null && _chatText.StartsWith("/bot "))
+        // List all GameManager methods containing "Chat"
+        var gmType = typeof(GameManager);
+        Console.WriteLine("[BotCommandMod] GameManager methods with 'Chat':");
+        foreach (var method in gmType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
         {
-            string playerName = _cInfo != null ? _cInfo.playerName : "Server";
-            Console.WriteLine($"[Bot] {playerName}: {_chatText}");
-            return false;
+            if (method.Name.Contains("Chat"))
+            {
+                var parameters = string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name + " " + p.Name));
+                Console.WriteLine($"  {method.Name}({parameters})");
+            }
         }
-        return true;
+
+        Console.WriteLine("[BotCommandMod] Loaded");
     }
 }
 
