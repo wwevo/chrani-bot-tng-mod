@@ -11,6 +11,8 @@ csc -target:library \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/netstandard.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.Core.dll" \
+    -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.Xml.dll" \
+    -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.Xml.Linq.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/Assembly-CSharp.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/UnityEngine.CoreModule.dll" \
     -r:"/home/ecv/Software/SteamLibrary/steamapps/common/7 Days To Die/Mods/0_TFP_Harmony/0Harmony.dll" \
