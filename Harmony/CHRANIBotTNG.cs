@@ -170,6 +170,8 @@ public static class AdminManager
 
     private static string FindServerAdminXml()
     {
+        List<string> attemptedPaths = new List<string>();
+
         try
         {
             // Try common locations
@@ -185,19 +187,32 @@ public static class AdminManager
                 try
                 {
                     string fullPath = Path.GetFullPath(path);
+                    attemptedPaths.Add(fullPath);
+
                     if (File.Exists(fullPath))
                     {
                         Console.WriteLine($"[AdminManager] Found serveradmin.xml: {fullPath}");
                         return fullPath;
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    attemptedPaths.Add($"{path} (Error: {e.Message})");
+                }
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"[AdminManager] Error finding serveradmin.xml: {e.Message}");
         }
+
+        // Log all attempted paths
+        Console.WriteLine("[AdminManager] serveradmin.xml not found. Attempted paths:");
+        foreach (var path in attemptedPaths)
+        {
+            Console.WriteLine($"  - {path}");
+        }
+
         return null;
     }
 
