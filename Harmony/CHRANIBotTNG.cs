@@ -149,7 +149,6 @@ public static class MuteStorage
     }
 }
 
-// ==================== ADMIN MANAGER (serveradmin.xml) ====================
 public static class AdminManager
 {
     private static HashSet<string> adminSteamIDs = new HashSet<string>();
@@ -174,15 +173,12 @@ public static class AdminManager
 
         try
         {
-            // Try common locations
-            // GetSaveGameDir() returns the world folder (e.g., Saves/RWG/WorldName)
-            // serveradmin.xml is in the Saves folder, so we need to go up 2 levels
             string[] possiblePaths = new[]
             {
-                Path.Combine(GameIO.GetSaveGameDir(), "..", "..", "serveradmin.xml"), // Saves/serveradmin.xml (standard location)
-                Path.Combine(GameIO.GetSaveGameDir(), "..", "serveradmin.xml"),       // Saves/RWG/serveradmin.xml
-                Path.Combine(GameIO.GetSaveGameDir(), "serveradmin.xml"),             // Saves/RWG/WorldName/serveradmin.xml
-                "serveradmin.xml"                                                      // Working directory
+                Path.Combine(GameIO.GetSaveGameDir(), "..", "..", "serveradmin.xml"),
+                Path.Combine(GameIO.GetSaveGameDir(), "..", "serveradmin.xml"),
+                Path.Combine(GameIO.GetSaveGameDir(), "serveradmin.xml"),
+                "serveradmin.xml"
             };
 
             foreach (string path in possiblePaths)
@@ -209,7 +205,6 @@ public static class AdminManager
             Console.WriteLine($"[AdminManager] Error finding serveradmin.xml: {e.Message}");
         }
 
-        // Log all attempted paths
         Console.WriteLine("[AdminManager] serveradmin.xml not found. Attempted paths:");
         foreach (var path in attemptedPaths)
         {
@@ -249,8 +244,26 @@ public static class AdminManager
 
     public static bool IsAdmin(ClientInfo _cInfo)
     {
-        if (_cInfo == null || _cInfo.InternalId == null) return false;
-        return adminSteamIDs.Contains(_cInfo.InternalId.ReadablePlatformUserIdentifier);
+        if (_cInfo == null || _cInfo.PlatformId == null) return false;
+
+        DumpObject(_cInfo);
+        string steamId = _cInfo.PlatformId.ReadablePlatformUserIdentifier;
+
+        Console.WriteLine($"[AdminManager] Checking admin-permissions for user: {steamId}");
+
+        // Try exact match first
+        if (adminSteamIDs.Contains(steamId))
+            return true;
+
+        // Try without "Steam_" prefix (serveradmin.xml might not have the prefix)
+        if (steamId.StartsWith("Steam_"))
+        {
+            string steamIdWithoutPrefix = steamId.Substring(6); // Remove "Steam_"
+            if (adminSteamIDs.Contains(steamIdWithoutPrefix))
+                return true;
+        }
+
+        return false;
     }
 
     public static int GetAdminCount()
@@ -264,6 +277,55 @@ public static class AdminManager
         {
             Console.WriteLine("[AdminManager] Reloading serveradmin.xml");
             LoadAdmins();
+        }
+    }
+
+    public static void DumpObject(object obj)
+    {
+        if (obj == null)
+        {
+            Console.WriteLine("Object is null");
+            return;
+        }
+
+        var type = obj.GetType();
+
+        Console.WriteLine($"Type: {type.Name}");
+
+        // Alle öffentlichen Eigenschaften
+        Console.WriteLine("Public Properties:");
+        foreach (var prop in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+        {
+            try
+            {
+                var val = prop.GetValue(obj);
+                Console.WriteLine($"  {prop.Name} = {val}");
+            }
+            catch { }
+        }
+
+        // Alle privaten und geschützten Eigenschaften
+        Console.WriteLine("All Properties (inkl. non-public):");
+        foreach (var prop in type.GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+        {
+            try
+            {
+                var val = prop.GetValue(obj);
+                Console.WriteLine($"  {prop.Name} = {val}");
+            }
+            catch { }
+        }
+
+        // Alle Felder (inkl. private)
+        Console.WriteLine("Fields:");
+        foreach (var field in type.GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+        {
+            try
+            {
+                var val = field.GetValue(obj);
+                Console.WriteLine($"  {field.Name} = {val}");
+            }
+            catch { }
         }
     }
 }
