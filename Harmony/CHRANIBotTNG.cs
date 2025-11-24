@@ -175,11 +175,14 @@ public static class AdminManager
         try
         {
             // Try common locations
+            // GetSaveGameDir() returns the world folder (e.g., Saves/RWG/WorldName)
+            // serveradmin.xml is in the Saves folder, so we need to go up 2 levels
             string[] possiblePaths = new[]
             {
-                Path.Combine(GameIO.GetSaveGameDir(), "..", "serveradmin.xml"),
-                Path.Combine(GameIO.GetSaveGameDir(), "serveradmin.xml"),
-                "serveradmin.xml"
+                Path.Combine(GameIO.GetSaveGameDir(), "..", "..", "serveradmin.xml"), // Saves/serveradmin.xml (standard location)
+                Path.Combine(GameIO.GetSaveGameDir(), "..", "serveradmin.xml"),       // Saves/RWG/serveradmin.xml
+                Path.Combine(GameIO.GetSaveGameDir(), "serveradmin.xml"),             // Saves/RWG/WorldName/serveradmin.xml
+                "serveradmin.xml"                                                      // Working directory
             };
 
             foreach (string path in possiblePaths)
