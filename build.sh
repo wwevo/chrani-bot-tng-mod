@@ -8,6 +8,7 @@ csc -target:library \
     -out:CHRANIBotTNG/CHRANIBotTNG.dll \
     -nostdlib \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/mscorlib.dll" \
+    -r:"$GAME_DIR/7DaysToDie_Data/Managed/LogLibrary.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/netstandard.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.dll" \
     -r:"$GAME_DIR/7DaysToDie_Data/Managed/System.Core.dll" \

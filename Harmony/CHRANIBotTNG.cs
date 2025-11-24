@@ -14,7 +14,7 @@ public class CHRANIBotTNG : IModApi
 
     public void InitMod(Mod _modInstance)
     {
-        Console.WriteLine("[CHRANIBotTNG] Loading");
+        Log.Out("[CHRANIBotTNG] Loading");
 
         modPath = _modInstance.Path;
 
@@ -28,7 +28,7 @@ public class CHRANIBotTNG : IModApi
         var harmony = new Harmony("com.chranibottng.mod");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        Console.WriteLine($"[CHRANIBotTNG] Loaded - {MutedPlayers.Count} muted players, {AdminManager.GetAdminCount()} admins");
+        Log.Out($"[CHRANIBotTNG] Loaded - {MutedPlayers.Count} muted players, {AdminManager.GetAdminCount()} admins");
     }
 }
 
@@ -46,7 +46,6 @@ public static class MuteStorage
             Directory.CreateDirectory(dataDir);
         }
         muteFilePath = Path.Combine(dataDir, "muted_players.json");
-        Console.WriteLine($"[MuteStorage] Initialized: {muteFilePath}");
     }
 
     public static HashSet<string> LoadMutedPlayers()
@@ -59,7 +58,7 @@ public static class MuteStorage
                 {
                     string json = File.ReadAllText(muteFilePath);
                     var players = ParseJsonArray(json);
-                    Console.WriteLine($"[MuteStorage] Loaded {players.Count} muted players");
+                    Log.Out($"[CHRANIBotTNG] Loaded {players.Count} muted players");
                     return players;
                 }
             }
@@ -79,7 +78,7 @@ public static class MuteStorage
             {
                 string json = ToJsonArray(players);
                 File.WriteAllText(muteFilePath, json);
-                Console.WriteLine($"[MuteStorage] Saved {players.Count} muted players");
+                Log.Out($"[CHRANIBotTNG] Saved {players.Count} muted players");
             }
             catch (Exception e)
             {
@@ -218,22 +217,23 @@ public static class AdminManager
     {
         try
         {
+            var permStr = "";
             XDocument doc = XDocument.Load(serverAdminPath);
 
             adminSteamIDs = doc.Descendants("user")
                 .Where(u =>
                 {
-                    var permStr = u.Attribute("permission_level")?.Value;
+                    permStr = u.Attribute("permission_level")?.Value;
                     return int.TryParse(permStr, out int perm) && perm < 1000;
                 })
                 .Select(u => u.Attribute("userid")?.Value)
                 .Where(id => !string.IsNullOrEmpty(id))
                 .ToHashSet();
 
-            Console.WriteLine($"[AdminManager] Loaded {adminSteamIDs.Count} admins (permission < 1000)");
+            Log.Out($"[CHRANIBotTNG] Loaded {adminSteamIDs.Count} admins (permission < 1000)");
             foreach (var id in adminSteamIDs)
             {
-                Console.WriteLine($"  Admin: {id}");
+                Log.Out($"[CHRANIBotTNG]     Admin: {id} ({permStr})");
             }
         }
         catch (Exception e)
@@ -249,7 +249,7 @@ public static class AdminManager
         DumpObject(_cInfo);
         string steamId = _cInfo.PlatformId.ReadablePlatformUserIdentifier;
 
-        Console.WriteLine($"[AdminManager] Checking admin-permissions for user: {steamId}");
+        Log.Out($"[CHRANIBotTNG] Checking admin-permissions for user: {steamId}");
 
         // Try exact match first
         if (adminSteamIDs.Contains(steamId))
@@ -275,7 +275,7 @@ public static class AdminManager
     {
         if (serverAdminPath != null)
         {
-            Console.WriteLine("[AdminManager] Reloading serveradmin.xml");
+            Log.Out($"[CHRANIBotTNG] Reloading serveradmin.xml");
             LoadAdmins();
         }
     }
@@ -345,14 +345,14 @@ public class ChatMessagePatch
                 // Check if user is admin
                 if (!AdminManager.IsAdmin(_cInfo))
                 {
-                    Console.WriteLine($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to mute - denied");
+                    Log.Out($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to mute - denied");
                 }
                 else
                 {
                     string targetId = parts[2];
                     CHRANIBotTNG.MutedPlayers.Add(targetId);
                     MuteStorage.SaveMutedPlayers(CHRANIBotTNG.MutedPlayers);
-                    Console.WriteLine($"[CHRANIBotTNG] Admin {_cInfo?.playerName} muted: {targetId}");
+                    Log.Out($"[CHRANIBotTNG] Admin {_cInfo?.playerName} muted: {targetId}");
                 }
             }
             else if (parts.Length >= 3 && parts[1].ToLower() == "unmute")
@@ -360,7 +360,7 @@ public class ChatMessagePatch
                 // Check if user is admin
                 if (!AdminManager.IsAdmin(_cInfo))
                 {
-                    Console.WriteLine($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to unmute - denied");
+                    Log.Out($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to unmute - denied");
                 }
                 else
                 {
@@ -368,11 +368,11 @@ public class ChatMessagePatch
                     if (CHRANIBotTNG.MutedPlayers.Remove(targetId))
                     {
                         MuteStorage.SaveMutedPlayers(CHRANIBotTNG.MutedPlayers);
-                        Console.WriteLine($"[CHRANIBotTNG] Admin {_cInfo?.playerName} unmuted: {targetId}");
+                        Log.Out($"[CHRANIBotTNG] Admin {_cInfo?.playerName} unmuted: {targetId}");
                     }
                     else
                     {
-                        Console.WriteLine($"[CHRANIBotTNG] Player was not muted: {targetId}");
+                        Log.Out($"[CHRANIBotTNG] Player was not muted: {targetId}");
                     }
                 }
             }
@@ -381,14 +381,14 @@ public class ChatMessagePatch
                 // Show muted players list
                 if (!AdminManager.IsAdmin(_cInfo))
                 {
-                    Console.WriteLine($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to view mutelist - denied");
+                    Log.Out($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to view mutelist - denied");
                 }
                 else
                 {
-                    Console.WriteLine($"[CHRANIBotTNG] Muted players ({CHRANIBotTNG.MutedPlayers.Count}):");
+                    Log.Out($"[CHRANIBotTNG] Muted players ({CHRANIBotTNG.MutedPlayers.Count}):");
                     foreach (var muted in CHRANIBotTNG.MutedPlayers)
                     {
-                        Console.WriteLine($"  - {muted}");
+                        Log.Out($"[CHRANIBotTNG]     {muted}");
                     }
                 }
             }
@@ -397,12 +397,12 @@ public class ChatMessagePatch
                 // Reload serveradmin.xml
                 if (!AdminManager.IsAdmin(_cInfo))
                 {
-                    Console.WriteLine($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to reload - denied");
+                    Log.Out($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to reload - denied");
                 }
                 else
                 {
                     AdminManager.Reload();
-                    Console.WriteLine($"[CHRANIBotTNG] Admin {_cInfo?.playerName} reloaded serveradmin.xml");
+                    Log.Out($"[CHRANIBotTNG] Admin {_cInfo?.playerName} reloaded serveradmin.xml");
                 }
             }
 
