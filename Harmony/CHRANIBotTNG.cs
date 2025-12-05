@@ -330,6 +330,98 @@ public static class AdminManager
     }
 }
 
+// ==================== PLAYERLIST COMMAND ====================
+public static class PlayerListCommand
+{
+    public static void Execute(ClientInfo _cInfo)
+    {
+        try
+        {
+            Log.Out($"[CHRANIBotTNG] Admin {_cInfo?.playerName} requested playerlist");
+
+            // Get persistent player data
+            PersistentPlayerList persistentPlayers = GameManager.Instance?.persistentPlayers;
+
+            if (persistentPlayers == null)
+            {
+                Log.Out("[CHRANIBotTNG] ERROR: Could not access persistent player list");
+                return;
+            }
+
+            // Get all player data
+            var allPlayers = new List<PersistentPlayerData>();
+            foreach (var playerData in persistentPlayers.Players.Values)
+            {
+                allPlayers.Add(playerData);
+            }
+
+            // Sort by last login time (most recent first)
+            allPlayers.Sort((a, b) => b.LastTimePlayed.CompareTo(a.LastTimePlayed));
+
+            Log.Out($"[CHRANIBotTNG] ===== Registered Players ({allPlayers.Count}) =====");
+            Log.Out($"[CHRANIBotTNG] Format: Name | Platform ID | Entity ID | Last Seen");
+            Log.Out($"[CHRANIBotTNG] {new string('-', 80)}");
+
+            // Get currently online players
+            var onlinePlayers = ConnectionManager.Instance?.Clients?.List;
+            var onlineIds = new HashSet<string>();
+
+            if (onlinePlayers != null)
+            {
+                foreach (var client in onlinePlayers)
+                {
+                    if (client?.PlatformId != null)
+                    {
+                        onlineIds.Add(client.PlatformId.ReadablePlatformUserIdentifier);
+                    }
+                }
+            }
+
+            foreach (var player in allPlayers)
+            {
+                string playerId = player.PrimaryId?.ReadablePlatformUserIdentifier ?? "Unknown";
+                string playerName = player.PlayerName ?? "Unknown";
+                string entityId = player.EntityId.ToString();
+
+                // Format last seen time
+                DateTime lastSeen = new DateTime(player.LastTimePlayed);
+                string lastSeenStr;
+
+                if (onlineIds.Contains(playerId))
+                {
+                    lastSeenStr = "[ONLINE]";
+                }
+                else
+                {
+                    TimeSpan timeSince = DateTime.Now - lastSeen;
+                    if (timeSince.TotalDays >= 1)
+                    {
+                        lastSeenStr = $"{(int)timeSince.TotalDays}d ago ({lastSeen:yyyy-MM-dd HH:mm})";
+                    }
+                    else if (timeSince.TotalHours >= 1)
+                    {
+                        lastSeenStr = $"{(int)timeSince.TotalHours}h ago ({lastSeen:yyyy-MM-dd HH:mm})";
+                    }
+                    else
+                    {
+                        lastSeenStr = $"{(int)timeSince.TotalMinutes}m ago ({lastSeen:yyyy-MM-dd HH:mm})";
+                    }
+                }
+
+                Log.Out($"[CHRANIBotTNG] {playerName,-20} | {playerId,-30} | {entityId,-8} | {lastSeenStr}");
+            }
+
+            Log.Out($"[CHRANIBotTNG] {new string('-', 80)}");
+            Log.Out($"[CHRANIBotTNG] Total: {allPlayers.Count} registered players, {onlineIds.Count} currently online");
+        }
+        catch (Exception e)
+        {
+            Log.Out($"[CHRANIBotTNG] ERROR executing playerlist: {e.Message}");
+            Log.Out($"[CHRANIBotTNG] Stack trace: {e.StackTrace}");
+        }
+    }
+}
+
 [HarmonyPatch(typeof(GameManager), "ChatMessageServer")]
 public class ChatMessagePatch
 {
@@ -403,6 +495,18 @@ public class ChatMessagePatch
                 {
                     AdminManager.Reload();
                     Log.Out($"[CHRANIBotTNG] Admin {_cInfo?.playerName} reloaded serveradmin.xml");
+                }
+            }
+            else if (parts.Length >= 2 && parts[1].ToLower() == "playerlist")
+            {
+                // List all registered players
+                if (!AdminManager.IsAdmin(_cInfo))
+                {
+                    Log.Out($"[CHRANIBotTNG] Non-admin {_cInfo?.playerName} tried to view playerlist - denied");
+                }
+                else
+                {
+                    PlayerListCommand.Execute(_cInfo);
                 }
             }
 
