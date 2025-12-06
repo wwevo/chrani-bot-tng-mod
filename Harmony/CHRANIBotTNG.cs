@@ -356,7 +356,7 @@ public static class PlayerListCommand
             }
 
             // Sort by last login time (most recent first)
-            allPlayers.Sort((a, b) => b.LastTimePlayed.CompareTo(a.LastTimePlayed));
+            allPlayers.Sort((a, b) => b.LastLogin.CompareTo(a.LastLogin));
 
             Log.Out($"[CHRANIBotTNG] ===== Registered Players ({allPlayers.Count}) =====");
             Log.Out($"[CHRANIBotTNG] Format: Name | Platform ID | Entity ID | Last Seen");
@@ -380,11 +380,11 @@ public static class PlayerListCommand
             foreach (var player in allPlayers)
             {
                 string playerId = player.PrimaryId?.ReadablePlatformUserIdentifier ?? "Unknown";
-                string playerName = player.PlayerName ?? "Unknown";
+                string playerName = player.PlayerName != null ? player.PlayerName.ToString() : "Unknown";
                 string entityId = player.EntityId.ToString();
 
                 // Format last seen time
-                DateTime lastSeen = new DateTime(player.LastTimePlayed);
+                DateTime lastSeen = new DateTime(player.LastLogin);
                 string lastSeenStr;
 
                 if (onlineIds.Contains(playerId))
