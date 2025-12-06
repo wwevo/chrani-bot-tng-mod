@@ -384,7 +384,7 @@ public static class PlayerListCommand
                 string entityId = player.EntityId.ToString();
 
                 // Format last seen time
-                DateTime lastSeen = new DateTime(player.LastLogin);
+                DateTime lastSeen = player.LastLogin;
                 string lastSeenStr;
 
                 if (onlineIds.Contains(playerId))
